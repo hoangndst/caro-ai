@@ -1,0 +1,12 @@
+{
+    "python.pythonPath": "/home/hoangndst/.local/share/virtualenvs/caro-ai-Rq92aHAC/bin/python",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.pyc": true,
+        "**/__pycache__": true
+    }
+}
