@@ -35,8 +35,7 @@ AI Project for Caro Game
 - [x] Alpha-Beta Pruning
 - [x] Zobrist Hashing
 ## References
-- [1] [](https://github.com/qwertyforce/gomoku_ai)
-- [2] [](https://github.com/VictorHarri-Chal/Gomoku)
-- [3] [](https://github.com/Giang-Dang/gomoku-AB-pruning)
-- [4] [](https://paperswithcode.com/paper/alphagomoku-an-alphago-based-gomoku)
-- [5] [](https://github.com/aaazyq/Gomoku)
+- [1] [qwertyforce/gomoku_ai](https://github.com/qwertyforce/gomoku_ai)
+- [2] [VictorHarri-Chal/Gomoku](https://github.com/VictorHarri-Chal/Gomoku)
+- [3] [aaazyq/Gomoku](https://github.com/aaazyq/Gomoku)
+- [4] [Zobrist Hashing](https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-5-zobrist-hashing/)
