@@ -1,76 +1,82 @@
-#!/usr/bin/env python3
-import sys
-import time
-import argparse
-from typing import Dict, Tuple
-import torch
+from cli.interface import *
+from lib.ai import *
+import lib.utils as utils
+import lib.gomoku as gomoku
+import lib.config as cfg
 
-import config as cfg
-from lib import model, utils
-from lib.game import game_provider
+N = cfg.N
+
+def startGame():
+    ai = GomokuAI()
+    game = GameUI(ai)
+    # # Draw the starting menu
+    game.drawMenu()
+    color = int(input())
+    run = True
+    while run:
+        # Check which color the user has chosen and set the states
+        game.checkColorChoice(color)
+        if game.ai.turn == 1:
+            game.ai.firstMove()
+            game.ai.turn *= -1
+                
+        main(game)
+
+        # When the game ends and there is a winner, draw the result board
+        if game.ai.checkResult() != None:
+            game.drawResult()
+            print('Choose option: 0. Restart, 1. Quit')
+            option = int(input())
+            if option == 0:
+                game.ai.turn = 0
+                startGame()
+            if option == 1:
+                run = False
+                break
 
 
-WinLoseDraw = Tuple[int, int, int]
+### Main game play loop ###
+def main(game):
+    # pygame.init()
+    end = False
+    result = game.ai.checkResult()
+    game.ai.drawBoard()
+    while not end:
+        turn = game.ai.turn
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "models", nargs='+', help="The list of models (at least 2) to play against each other")
-    parser.add_argument("-r", "--rounds", type=int, default=2,
-                        help="Count of rounds to perform for every pair")
-    parser.add_argument("--cuda", default=False,
-                        action="store_true", help="Enable CUDA")
-    game_provider.add_game_argument(parser)
-    args = parser.parse_args()
-    device = "cuda" if args.cuda else "cpu"
+        # AI's turn
+        if turn == 1:
+            print('AI\'s turn')
+            move_i, move_j = gomoku.ai_move(game.ai)
+            # Make the move and update zobrist hash
+            game.ai.setState(move_i, move_j, turn)
+            game.ai.rollingHash ^= game.ai.zobristTable[move_i][move_j][0]
+            game.ai.emptyCells -= 1
 
-    game = game_provider.get_game(args)
+            result = game.ai.checkResult()
+            # Switch turn
+            game.ai.turn *= -1
+            game.ai.drawBoard()
 
-    nets = []
-    for fname in args.models:
-        net = model.Net(game.obs_shape, game.action_space)
-        net.load_state_dict(torch.load(
-            fname, map_location=lambda storage, loc: storage))
-        net = net.to(device)
-        nets.append((fname, net))
-
-    total_agent: Dict[str, WinLoseDraw] = {}
-    total_pairs: Dict[Tuple[str, str], WinLoseDraw] = {}
-
-    for idx1, n1 in enumerate(nets):
-        for idx2, n2 in enumerate(nets):
-            if idx1 == idx2:
-                continue
-            wins, losses, draws = 0, 0, 0
-            ts = time.time()
-            for _ in range(args.rounds):
-                r, _ = utils.play_game(game=game, mcts_stores=None, replay_buffer=None,
-                                       net1=n1[1], net2=n2[1],
-                                       steps_before_tau_0=0,
-                                       mcts_searches=cfg.PLAY_MCTS_SEARCHES,
-                                       mcts_batch_size=cfg.PLAY_MCTS_BATCH_SIZE,
-                                       device=device)
-                if r > 0.5:
-                    wins += 1
-                elif r < -0.5:
-                    losses += 1
-                else:
-                    draws += 1
-            speed_games = args.rounds / (time.time() - ts)
-            name_1, name_2 = n1[0], n2[0]
-            print("%s vs %s -> w=%d, l=%d, d=%d" %
-                  (name_1, name_2, wins, losses, draws))
-            sys.stderr.write("Speed %.2f games/s\n" % speed_games)
-            sys.stdout.flush()
-            utils.update_counts(total_agent, name_1, (wins, losses, draws))
-            utils.update_counts(total_agent, name_2, (losses, wins, draws))
-            utils.update_counts(
-                total_pairs, (name_1, name_2), (wins, losses, draws))
-
-    # leaderboard by total wins
-    total_leaders = list(total_agent.items())
-    total_leaders.sort(reverse=True, key=lambda p: p[1][0])
-
-    print("Leaderboard:")
-    for name, (wins, losses, draws) in total_leaders:
-        print("%s: \t w=%d, l=%d, d=%d" % (name, wins, losses, draws))
+        # Human's turn
+        if turn == -1:
+            print('Your turn, enter your move: ')
+            move = input() # move = i * N + j
+            move_i = int(move) // N
+            move_j = int(move) % N
+            # Check the validity of human's move
+            if game.ai.isValid(move_i, move_j):
+                game.ai.boardValue = game.ai.evaluate(move_i, move_j, game.ai.boardValue, -1, game.ai.nextBound)
+                game.ai.updateBound(move_i, move_j, game.ai.nextBound)
+                game.ai.currentI, game.ai.currentJ = move_i, move_j
+                # Make the move and update zobrist hash
+                game.ai.setState(move_i, move_j, turn)
+                game.ai.rollingHash ^= game.ai.zobristTable[move_i][move_j][1]
+                game.ai.emptyCells -= 1                
+                result =  game.ai.checkResult()
+                game.ai.turn *= -1
+                game.ai.drawBoard()
+        if result != None:
+            end = True
+if __name__ == '__main__':
+    startGame()

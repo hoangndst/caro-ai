@@ -4,7 +4,7 @@ AI Project for Caro Game
 
 ## JSON API
 - Frontend
-    ``` json
+    ``` js
     {
         match_id: xxx,
         status: None, (draw, teamID Win) (nếu khác None sẽ in ra draw hoặc xxx Win và kết thúc).
@@ -21,7 +21,7 @@ AI Project for Caro Game
     }
     ```
 - Backend
-    ``` json
+    ``` js
     {
         match_id: xxx,
         team_id: xxx,
@@ -31,10 +31,12 @@ AI Project for Caro Game
     ```
 
 ## Requirements Knowledge
-- [x] Machine Learning
-- [x] Reinforcement Learning
-- [x] Neural Network
-- [x] Monte Carlo Tree Search
+- [x] Minimax Algorithm
+- [x] Alpha-Beta Pruning
+- [x] Zobrist Hashing
 ## References
-- [1] [A Simple Alpha(Go) Zero Tutorial](https://web.stanford.edu/~surag/posts/alphazero.html)
-- [2] [Monte Carlo Tree Search](https://web.archive.org/web/20180623055344/http://mcts.ai/about/index.html)
+- [1] [](https://github.com/qwertyforce/gomoku_ai)
+- [2] [](https://github.com/VictorHarri-Chal/Gomoku)
+- [3] [](https://github.com/Giang-Dang/gomoku-AB-pruning)
+- [4] [](https://paperswithcode.com/paper/alphagomoku-an-alphago-based-gomoku)
+- [5] [](https://github.com/aaazyq/Gomoku)
