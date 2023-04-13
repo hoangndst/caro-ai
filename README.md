@@ -1,6 +1,6 @@
 # caro-ai
-AI Project for Caro Game
 ## Introduction
+This is a project for AI course. The goal is to create a Gomoku AI using Minimax Algorithm with Alpha-Beta Pruning and Zobrist Hashing.
 
 ## JSON API
 - Frontend
